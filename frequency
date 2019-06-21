@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# Perform calculations more easily. You can use 'x' for multiplication instead
+# of '*' if you don't weant to have to use quotes (otherwise bash will expand it
+# as a glob). ex) calcu 2 x 5 → 10, calcu '(512 + (19 * 5)) / 2' → 303.5
+calcu() { 
+	echo "scale=20;$@" | sed -e s/x/*/g | bc | sed '/\./ s/\.\{0,1\}0\{1,\}$//'
+}
+
+# Every character on its own Line
+all_chars="$(cat "$@" | grep -o . | sort )"
+
+# The total number of characters
+all_chars_count=$(echo "$all_chars" | wc -l)
+
+# The total number of occurences of each character
+count_table=$(echo "$all_chars" | uniq -c | sed 's/^[ ]*//g' | tr ' ' ',')
+
+json="{"
+for e in $count_table; do
+	num=$(echo "$e" | sed 's/,.*//g')
+	char=$(echo "$e" | sed 's/.*,//g')
+	rel_frequency=$(calcu $num / $all_chars_count x 10000000)
+	json="$json""\"$char\": [$num, $rel_frequency],"
+done
+json="$json"'}'
+echo $json | sed 's/,}/}/g'
+
+
