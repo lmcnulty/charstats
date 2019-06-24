@@ -1,6 +1,6 @@
 To get a comparison of the frequencies in two files, run
 
-	./compare-frequencies <file-1> <file-1>
+	./compare-frequencies <file-1> <file-2> <file-3> … <file-n>
 
 Example:
 
@@ -32,4 +32,11 @@ Example:
 	裒, 0, 165.5163281857755
 	…
 
+To compare *every* file in the data set, run
+
+	$ for e in data/*.txt; do echo $e; done | xargs -d "\n" ./compare-frequencies > sheet.csv
+
+Frequency data for any file f is stored in f.json. To re-generate the files, using 4 seperate processes for speed, run:
+	
+	for e in data/*.txt; do echo $e; done | xargs -d "\n" -P 4 -n 1 cache
 

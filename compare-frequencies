@@ -4,25 +4,73 @@ import subprocess
 import sys
 import json
 import glob
+import os
+import os.path
+
+def basename(filename): return filename.split(os.path.sep)[-1]
+
+# `dicts` maps file names to dictionaries mapping characters to
+# frequency data. eg. 
+"""
+{	"郭店 - Guodian-老子丙.txt" : {
+		"上": [10, 142045.4545454545454],
+		"下": [6, 85227.2727272727272],
+		"不": [20, 284090.9090909090909],
+		…
+	},
+	"鬻子 - Yuzi-上禹政第六.txt" : {
+		"一": [2, 66225.1655629139072],
+		"七": [2, 66225.1655629139072],
+		"下": [2, 66225.1655629139072],
+		…
+	}
+	…
+}
+"""
+dicts = {}
+
+# The set of all characters in the data
+keys = set()
+
+print("Character", end="")
+for i in range(1, len(sys.argv)):
+	print("", end="")
+	filename = sys.argv[i]
+	print("Parsing " + filename, file=sys.stderr)
+
+	no_json = False
+	if os.path.isfile(filename + ".json"):
+		with open(filename + ".json") as f:
+			try:
+				dicts[filename] = json.loads(f.read())
+			except:
+				no_json = True 
+	else: no_json = True
+	if no_json:
+		jsonData = subprocess.check_output(
+			['./frequency'] + glob.glob(filename)
+		).decode("utf-8")
+		with open(filename + ".json", "w") as f: f.write(jsonData)
+		try:
+			dicts[filename] = json.loads(jsonData)
+		except:
+			print("Could not parse data for " + filename, file=sys.stderr)
+			continue
+	keys = keys.union(set(dicts[filename].keys()))
+
+	print(", " + basename(sys.argv[i]), end="")
+""
+print("")
 
 
-dict1 = json.loads(subprocess.check_output(['./frequency'] + glob.glob(sys.argv[1])).decode("utf-8"))
-
-dict2 = json.loads(subprocess.check_output(['./frequency'] + glob.glob(sys.argv[2])).decode("utf-8"))
-
-print("Character, Rel. Freq. in " + sys.argv[1] + ", Rel. Freq. in " + sys.argv[2])
-
-for char in set(list(dict1.keys()) + list(dict2.keys())):
-	print(char + ", ", end="")
-	if char in dict1:
-		print(str(dict1[char][1]), end="")
-	else:
-		print(0, end="")
-	print(", ", end="")
-	if char in dict2:
-		print(str(dict2[char][1]), end="")
-	else:
-		print(0, end="")
+for char in keys:
+	print(char, end="")
+	print("Printing output for " + char, file=sys.stderr)
+	for filename in dicts:
+		if char in dicts[filename]:
+			print("," + str(round(dicts[filename][char][1])), end="")
+		else:
+			print(",0", end="")
 	print("")
-
+""
 
