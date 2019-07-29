@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+
+import json
+import sys
+
+data = json.load(sys.stdin)
+
+print("Character, Abs. Freq., Rel. Freq.")
+for key in data.keys():
+	print(key, end=",")
+	print(data[key][0], end=",")
+	print(round(data[key][1]))
+

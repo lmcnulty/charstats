@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
 
-./frequency "$1" > "$1.json"
+if [ ! -f "$1".json	 ]; then
+	./frequency "$1" --ignore "$(cat stop.txt | tr '\n' ' ')" > "$1.json"
+else
+	echo "Skipping $1"
+fi
+

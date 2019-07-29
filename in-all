@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+
+import sys
+
+chars = set()
+
+prev_set_size = 0
+first_file = True
+for e in sys.argv[1:]:
+	with open(e, 'r') as f:
+		file_chars = set(f.read())
+		chars = file_chars if first_file else chars & file_chars
+		new_set_size = len(chars)
+		if new_set_size != prev_set_size:
+			print(e, file=sys.stderr)
+			print(str(prev_set_size) + " → " + str(new_set_size), end="\n")
+			print(' ' * 4 + ' '.join(chars).replace("\n", "\\n"), end="\n\n")
+			prev_set_size = new_set_size
+	first_file = False
+
+for char in chars: print(char, end=" ")
+print("")
+				

@@ -47,8 +47,11 @@ for i in range(1, len(sys.argv)):
 				no_json = True 
 	else: no_json = True
 	if no_json:
+		stop = ""
+		with open("stop.txt") as f:
+			stop = f.read()
 		jsonData = subprocess.check_output(
-			['./frequency'] + glob.glob(filename)
+			['./frequency'] + glob.glob(filename) + ["--ignore", stop]
 		).decode("utf-8")
 		with open(filename + ".json", "w") as f: f.write(jsonData)
 		try:
@@ -65,7 +68,6 @@ print("")
 
 for char in keys:
 	print(char, end="")
-	print("Printing output for " + char, file=sys.stderr)
 	for filename in dicts:
 		if char in dicts[filename]:
 			print("," + str(round(dicts[filename][char][1])), end="")
